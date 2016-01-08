@@ -449,6 +449,31 @@ class ilUserSetting extends ActiveRecord {
 	 * @con_length    256
 	 */
 	protected $portfolio_name = '';
+	/**
+	 * @var string
+	 *
+	 * @con_has_field true
+	 * @con_fieldtype text
+	 * @con_length    256
+	 */
+	protected $skin = '';
+	/**
+	 * @var int
+	 *
+	 * @con_has_field  true
+	 * @con_fieldtype  integer
+	 * @con_length     8
+	 */
+	protected $usr_starting_point = 0;
+	/**
+	 * @var int
+	 *
+	 * @con_has_field  true
+	 * @con_fieldtype  integer
+	 * @con_length     8
+	 */
+	protected $usr_starting_point_ref_id = 0;
+	
 
 	/**
 	 * @var array
@@ -585,6 +610,55 @@ class ilUserSetting extends ActiveRecord {
 	public function getTitle() {
 		return $this->title;
 	}
+
+	/**
+	 * @return string
+	 */
+	public function getSkin()
+	{
+		return $this->skin;
+	}
+
+	/**
+	 * @param string $skin
+	 */
+	public function setSkin($skin)
+	{
+		$this->skin = $skin;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getUsrStartingPoint()
+	{
+		return $this->usr_starting_point;
+	}
+
+	/**
+	 * @param int $usr_starting_point
+	 */
+	public function setUsrStartingPoint($usr_starting_point)
+	{
+		$this->usr_starting_point = $usr_starting_point;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getUsrStartingPointRefId()
+	{
+		return $this->usr_starting_point_ref_id;
+	}
+
+	/**
+	 * @param int $usr_starting_point_ref_id
+	 */
+	public function setUsrStartingPointRefId($usr_starting_point_ref_id)
+	{
+		$this->usr_starting_point_ref_id = $usr_starting_point_ref_id;
+	}
+
 
 
 	/**

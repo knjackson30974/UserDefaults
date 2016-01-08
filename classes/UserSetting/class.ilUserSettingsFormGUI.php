@@ -11,6 +11,7 @@ require_once('./Customizing/global/plugins/Services/EventHandling/EventHook/User
 class ilUserSettingsFormGUI extends ilPropertyFormGUI {
 
 	const F_TITLE = 'title';
+	const F_SKIN = 'Skin';
 	const F_STATUS = 'status';
 	const F_GLOBAL_ROLE = 'global_role';
 	const F_ASSIGNED_COURSES = 'assigned_courses';
@@ -38,7 +39,8 @@ class ilUserSettingsFormGUI extends ilPropertyFormGUI {
 	 */
 	public function __construct(ilUserSettingsGUI $parent_gui, ilUserSetting $ilUserSetting) {
 
-		global $ilCtrl;
+		global $ilCtrl,$lng;
+		$this->lng = $lng;
 		$this->parent_gui = $parent_gui;
 		$this->object = $ilUserSetting;
 		$this->ctrl = $ilCtrl;
@@ -102,6 +104,9 @@ class ilUserSettingsFormGUI extends ilPropertyFormGUI {
 		//		$te->setRequired(true);
 		$this->addItem($te);
 
+		$te = new ilTextInputGUI($this->txt(self::F_SKIN), self::F_SKIN);
+		$this->addItem($te);
+
 		$te = new ilTextInputGUI($this->txt(self::F_BLOG_NAME), self::F_BLOG_NAME);
 		$this->addItem($te);
 
@@ -112,6 +117,46 @@ class ilUserSettingsFormGUI extends ilPropertyFormGUI {
 		$ilOrgUnitMultiSelectInputGUI = new ilContainerMultiSelectInputGUI('orgu', $this->txt(self::F_ASSIGNED_ORGUS), self::F_ASSIGNED_ORGUS);
 		$ilOrgUnitMultiSelectInputGUI->setAjaxLink($this->ctrl->getLinkTarget($this->parent_gui, ilUserSettingsGUI::CMD_SEARCH_COURSES));
 		$this->addItem($ilOrgUnitMultiSelectInputGUI);
+
+		include_once "Services/User/classes/class.ilUserUtil.php";
+
+		$this->lng->loadLanguageModule("administration");
+		$si = new ilRadioGroupInputGUI($this->lng->txt("adm_user_starting_point"), "usr_start");
+		$si->setRequired(true);
+		$si->setInfo($this->lng->txt("adm_user_starting_point_info"));
+		foreach(ilUserUtil::getPossibleStartingPoints() as $value => $caption)
+		{
+			$si->addOption(new ilRadioOption($caption, $value));
+		}
+
+		$this->addItem($si);
+
+		// starting point: repository object
+		$repobj = new ilRadioOption($this->lng->txt("adm_user_starting_point_object"), ilUserUtil::START_REPOSITORY_OBJ);
+		$repobj_id = new ilTextInputGUI($this->lng->txt("adm_user_starting_point_ref_id"), "usr_start_ref_id");
+		$repobj_id->setRequired(true);
+		$repobj_id->setSize(5);
+		if($si->getValue() == ilUserUtil::START_REPOSITORY_OBJ)
+		{
+			$start_ref_id = ilUserUtil::getPersonalStartingObject();
+			$repobj_id->setValue($start_ref_id);
+			if($start_ref_id)
+			{
+				$start_obj_id = ilObject::_lookupObjId($start_ref_id);
+				if($start_obj_id)
+				{
+					$repobj_id->setInfo($this->lng->txt("obj_".ilObject::_lookupType($start_obj_id)).
+							": ".ilObject::_lookupTitle($start_obj_id));
+				}
+			}
+		}
+		$repobj->addSubItem($repobj_id);
+		$si->addOption($repobj);
+
+
+
+
+
 
 		if($this->pl->is51()) {
 			$ilStudyProgramMultiSelectInputGUI = new ilContainerMultiSelectInputGUI('prg', $this->txt(self::F_ASSIGNED_STUDYPROGRAMS), self::F_ASSIGNED_STUDYPROGRAMS);
@@ -147,18 +192,18 @@ class ilUserSettingsFormGUI extends ilPropertyFormGUI {
 
 	public function fillForm() {
 		$array = array(
-			self::F_TITLE => $this->object->getTitle(),
-			self::F_DESCRIPTION => $this->object->getDescription(),
+				self::F_TITLE => $this->object->getTitle(),
+				self::F_DESCRIPTION => $this->object->getDescription(),
 			//			self::F_STATUS => ($this->object->getStatus() == ilUserSetting::STATUS_ACTIVE ? 1 : 0),
-			self::F_ASSIGNED_COURSES => implode(',', $this->object->getAssignedCourses()),
-			self::F_ASSIGNED_GROUPS => implode(',', $this->object->getAssignedGroupes()),
-			self::F_GLOBAL_ROLE => $this->object->getGlobalRole(),
-			self::F_PORTFOLIO_TEMPLATE_ID => $this->object->getPortfolioTemplateId(),
-			self::F_PORTFOLIO_ASSIGNED_TO_GROUPS => implode(',', $this->object->getPortfolioAssignedToGroups()),
-			self::F_BLOG_NAME => $this->object->getBlogName(),
-			self::F_PORTFOLIO_NAME => $this->object->getPortfolioName(),
-			self::F_ASSIGNED_ORGUS=> implode(',',$this->object->getAssignedOrgus()),
-			self::F_ASSIGNED_STUDYPROGRAMS=> implode(',',$this->object->getAssignedStudyprograms()),
+				self::F_ASSIGNED_COURSES => implode(',', $this->object->getAssignedCourses()),
+				self::F_ASSIGNED_GROUPS => implode(',', $this->object->getAssignedGroupes()),
+				self::F_GLOBAL_ROLE => $this->object->getGlobalRole(),
+				self::F_PORTFOLIO_TEMPLATE_ID => $this->object->getPortfolioTemplateId(),
+				self::F_PORTFOLIO_ASSIGNED_TO_GROUPS => implode(',', $this->object->getPortfolioAssignedToGroups()),
+				self::F_BLOG_NAME => $this->object->getBlogName(),
+				self::F_PORTFOLIO_NAME => $this->object->getPortfolioName(),
+				self::F_ASSIGNED_ORGUS=> implode(',',$this->object->getAssignedOrgus()),
+				self::F_ASSIGNED_STUDYPROGRAMS=> implode(',',$this->object->getAssignedStudyprograms()),
 
 		);
 		$this->setValuesByArray($array);
@@ -172,6 +217,7 @@ class ilUserSettingsFormGUI extends ilPropertyFormGUI {
 		if (!$this->checkInput()) {
 			return false;
 		}
+
 		$this->object->setTitle($this->getInput(self::F_TITLE));
 		$this->object->setDescription($this->getInput(self::F_DESCRIPTION));
 		//		$this->object->setStatus($this->getInput(self::F_STATUS));
@@ -190,6 +236,11 @@ class ilUserSettingsFormGUI extends ilPropertyFormGUI {
 		$this->object->setAssignedOrgus(explode(',', $assigned_orgus[0]));
 		$assigned_studyprograms = $this->getInput(self::F_ASSIGNED_STUDYPROGRAMS);
 		$this->object->setAssignedStudyprograms(explode(',', $assigned_studyprograms[0]));
+		$this->object->setSkin($this->getInput(self::F_SKIN));
+		$this->object->setUsrStartingPoint($this->getInput(usr_start));
+		$this->object->setUsrStartingPointRefId($this->getInput('usr_start_ref_id'));
+
+
 
 		if ($this->object->getId() > 0) {
 			$this->object->update();
