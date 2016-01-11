@@ -39,3 +39,6 @@ check_back#:#<< Back
 crs_placeholder#:#Choose Courses
 grp_placeholder#:#Choose Groups
 check_cancel#:#Cancel
+set_Skin#:#Skin
+set_assigned_orgus#:#Organizations
+orgu_placeholder#:#Choose Organizations

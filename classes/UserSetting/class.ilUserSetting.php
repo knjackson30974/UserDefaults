@@ -168,6 +168,8 @@ class ilUserSetting extends ActiveRecord {
 			$this->assignGroups();
 			$this->assignToGlobalRole();
 			$this->assignOrgunits();
+			$this->assignSkin();
+			$this->assignUserStartingPoint();
 			if(ilUserDefaultsPlugin::getInstance()->is51())
 				$this->assignStudyprograms();
 		}
@@ -660,7 +662,6 @@ class ilUserSetting extends ActiveRecord {
 	}
 
 
-
 	/**
 	 * @param array $assigned_courses
 	 */
@@ -922,6 +923,31 @@ class ilUserSetting extends ActiveRecord {
 		}
 		return true;
 	}
+
+	protected function assignSkin() {
+		if(is_null($this->getSkin()))
+			return false;
+
+		$this->getUsrObject()->setPref('skin', $this->getSkin());
+		$this->getUsrObject()->setPref('style', $this->getSkin());
+		$this->getUsrObject()->update();
+
+		return true;
+	}
+
+	protected function assignUserStartingPoint() {
+
+		if(is_null($this->getUsrStartingPoint()) || is_null($this->getUsrStartingPointRefId()))
+			return false;
+
+		$this->getUsrObject()->setPref('usr_starting_point', $this->getUsrStartingPoint());
+		$this->getUsrObject()->setPref('usr_starting_point_ref_id', $this->getUsrStartingPointRefId());
+		$this->getUsrObject()->update();
+
+		return true;
+	}
 }
 
 ?>
+
+

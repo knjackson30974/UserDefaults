@@ -55,7 +55,6 @@ class ilUserDefaultsPlugin extends ilEventHookPlugin {
 			/**
 			 * @var $ilUser ilObjUser
 			 */
-
 			if ( is_null($a_parameter['user_obj']) && $a_parameter['username'] !== 'anonymous' )
 			{
 				$ilUser = new ilObjUser( ilObjUser::getUserIdByLogin( $a_parameter['username'] ) );

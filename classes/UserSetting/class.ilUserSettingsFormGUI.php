@@ -23,6 +23,8 @@ class ilUserSettingsFormGUI extends ilPropertyFormGUI {
 	const F_DESCRIPTION = 'description';
 	const F_PORTFOLIO_NAME = 'portfolio_name';
 	const F_BLOG_NAME = 'blog_name';
+	const F_USR_START = 'usr_start';
+	const F_USR_START_REF_ID = 'usr_start_ref_id';
 	/**
 	 * @var ilUserSettingsGUI
 	 */
@@ -39,7 +41,7 @@ class ilUserSettingsFormGUI extends ilPropertyFormGUI {
 	 */
 	public function __construct(ilUserSettingsGUI $parent_gui, ilUserSetting $ilUserSetting) {
 
-		global $ilCtrl,$lng;
+		global $ilCtrl,$lng,$styleDefinition;
 		$this->lng = $lng;
 		$this->parent_gui = $parent_gui;
 		$this->object = $ilUserSetting;
@@ -62,6 +64,7 @@ class ilUserSettingsFormGUI extends ilPropertyFormGUI {
 
 
 	protected function initForm() {
+		
 		$this->setTitle($this->pl->txt('form_title'));
 		$te = new ilTextInputGUI($this->txt(self::F_TITLE), self::F_TITLE);
 		$te->setRequired(true);
@@ -104,8 +107,22 @@ class ilUserSettingsFormGUI extends ilPropertyFormGUI {
 		//		$te->setRequired(true);
 		$this->addItem($te);
 
-		$te = new ilTextInputGUI($this->txt(self::F_SKIN), self::F_SKIN);
-		$this->addItem($te);
+
+//var_dump(ilStyleDefinition::getAllSkinStyles());
+$se = new ilSelectInputGUI($this->txt(self::F_SKIN), self::F_SKIN);
+$skins = ilStyleDefinition::getAllSkinStyles();
+$options = [];
+foreach ($skins as $skin) {
+	$options[$skin["template_id"]] = $skin["title"];
+}
+
+asort($options);
+
+$se->setOptions($options);
+$this->addItem($se);
+
+// $te = new ilTextInputGUI($this->txt(self::F_SKIN), self::F_SKIN);
+// $this->addItem($te);
 
 		$te = new ilTextInputGUI($this->txt(self::F_BLOG_NAME), self::F_BLOG_NAME);
 		$this->addItem($te);
@@ -204,7 +221,9 @@ class ilUserSettingsFormGUI extends ilPropertyFormGUI {
 				self::F_PORTFOLIO_NAME => $this->object->getPortfolioName(),
 				self::F_ASSIGNED_ORGUS=> implode(',',$this->object->getAssignedOrgus()),
 				self::F_ASSIGNED_STUDYPROGRAMS=> implode(',',$this->object->getAssignedStudyprograms()),
-
+				self::F_SKIN => $this->object->getSkin(),
+				self::F_USR_START => $this->object->getUsrStartingPoint(),
+				self::F_USR_START_REF_ID => $this->object->getUsrStartingPointRefId(),
 		);
 		$this->setValuesByArray($array);
 	}
@@ -237,8 +256,8 @@ class ilUserSettingsFormGUI extends ilPropertyFormGUI {
 		$assigned_studyprograms = $this->getInput(self::F_ASSIGNED_STUDYPROGRAMS);
 		$this->object->setAssignedStudyprograms(explode(',', $assigned_studyprograms[0]));
 		$this->object->setSkin($this->getInput(self::F_SKIN));
-		$this->object->setUsrStartingPoint($this->getInput(usr_start));
-		$this->object->setUsrStartingPointRefId($this->getInput('usr_start_ref_id'));
+		$this->object->setUsrStartingPoint($this->getInput(self::F_USR_START));
+		$this->object->setUsrStartingPointRefId($this->getInput(self::F_USR_START_REF_ID));
 
 
 
