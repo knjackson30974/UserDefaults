@@ -49,12 +49,21 @@ class ilUserDefaultsPlugin extends ilEventHookPlugin {
 		//					}
 		//				}
 
-		if ($a_component == 'Services/User' AND ($a_event == 'saveAsNew' OR $a_event == 'afterCreate')) {
+//		if ($a_parameter['user_obj'] !== NULL &&( ($a_component == 'Services/User' AND ($a_event == 'saveAsNew' OR $a_event == 'afterCreate')) || $a_event == 'afterLogin' )) {
+
+		if ( $a_component == 'Services/Authentication' && $a_event == 'afterLogin' ) {
 			/**
 			 * @var $ilUser ilObjUser
 			 */
 
-			$ilUser = $a_parameter['user_obj'];
+			if ( is_null($a_parameter['user_obj']) && $a_parameter['username'] !== 'anonymous' )
+			{
+				$ilUser = new ilObjUser( ilObjUser::getUserIdByLogin( $a_parameter['username'] ) );
+			}
+			else 
+			{
+				$ilUser = $a_parameter['user_obj'];
+			}
 
 			if ($ilUser instanceof ilObjUser) {
 				// Do Stuff
