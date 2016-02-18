@@ -927,11 +927,10 @@ class ilUserSetting extends ActiveRecord {
 	protected function assignSkin() {
 		if(is_null($this->getSkin()))
 			return false;
-
-		$this->getUsrObject()->setPref('skin', $this->getSkin());
-		$this->getUsrObject()->setPref('style', $this->getSkin());
+		$sknst = explode(":", $this->getSkin());
+		$this->getUsrObject()->setPref("skin", $sknst[0]);
+		$this->getUsrObject()->setPref("style", $sknst[1]);
 		$this->getUsrObject()->update();
-
 		return true;
 	}
 

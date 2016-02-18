@@ -108,21 +108,19 @@ class ilUserSettingsFormGUI extends ilPropertyFormGUI {
 		$this->addItem($te);
 
 
-//var_dump(ilStyleDefinition::getAllSkinStyles());
-$se = new ilSelectInputGUI($this->txt(self::F_SKIN), self::F_SKIN);
-$skins = ilStyleDefinition::getAllSkinStyles();
-$options = [];
-foreach ($skins as $skin) {
-	$options[$skin["template_id"]] = $skin["title"];
-}
+		$se = new ilSelectInputGUI($this->txt(self::F_SKIN), self::F_SKIN);
+		$options = [];
+		foreach (ilStyleDefinition::getAllSkinStyles() as $skin) {
+		$options[$skin["id"]] = $skin["title"];
+		}
 
-asort($options);
+		asort($options);
 
-$se->setOptions($options);
-$this->addItem($se);
+		$se->setOptions($options);
+		$this->addItem($se);
 
-// $te = new ilTextInputGUI($this->txt(self::F_SKIN), self::F_SKIN);
-// $this->addItem($te);
+		// $te = new ilTextInputGUI($this->txt(self::F_SKIN), self::F_SKIN);
+		// $this->addItem($te);
 
 		$te = new ilTextInputGUI($this->txt(self::F_BLOG_NAME), self::F_BLOG_NAME);
 		$this->addItem($te);
