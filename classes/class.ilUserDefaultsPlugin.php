@@ -32,43 +32,21 @@ class ilUserDefaultsPlugin extends ilEventHookPlugin {
 
 
 	/**
-	 * Handle the event
 	 *
-	 * @param    string        component, e.g. "Services/User"
-	 * @param    event         event, e.g. "afterUpdate"
-	 * @param    array         array of event specific parameters
+	 * JKN Patch, if naflogin is triggered do the assignments(only triggered when a new user account is created with naf plugin)
+	 *
 	 */
 	public function handleEvent($a_component, $a_event, $a_parameter) {
-		//				if ($a_component == 'Modules/Course' AND $a_event == 'update') {
-		//					global $ilUser;
-		//					/**
-		//					 * @var $ilUserSetting ilUserSetting
-		//					 */
-		//					foreach (ilUserSetting::where(array( 'status' => ilUserSetting::STATUS_ACTIVE ))->get() as $ilUserSetting) {
-		////						$ilUserSetting->doAssignements($ilUser);
-		//					}
-		//				}
-
-//		if ($a_parameter['user_obj'] !== NULL &&( ($a_component == 'Services/User' AND ($a_event == 'saveAsNew' OR $a_event == 'afterCreate')) || $a_event == 'afterLogin' )) {
-
-		if ( $a_component == 'Services/Authentication' && $a_event == 'afterLogin' ) {
+		if ( $a_component == 'Services/Authentication' && $a_event == 'nafLogin' ) {
 			/**
 			 * @var $ilUser ilObjUser
 			 */
-			if ( is_null($a_parameter['user_obj']) && $a_parameter['username'] !== 'anonymous' )
-			{
+			if ( is_null($a_parameter['user_obj']) && $a_parameter['username'] !== 'anonymous' ) {
 				$ilUser = new ilObjUser( ilObjUser::getUserIdByLogin( $a_parameter['username'] ) );
-			}
-			else 
-			{
+			} else {
 				$ilUser = $a_parameter['user_obj'];
 			}
-
 			if ($ilUser instanceof ilObjUser) {
-				// Do Stuff
-				/**
-				 * @var $ilUserSetting ilUserSetting
-				 */
 				foreach (ilUserSetting::where(array( 'status' => ilUserSetting::STATUS_ACTIVE ))->get() as $ilUserSetting) {
 					$ilUserSetting->doAssignements($ilUser);
 				}
