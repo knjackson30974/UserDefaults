@@ -885,6 +885,7 @@ class ilUserSetting extends ActiveRecord {
 	 * @return bool
 	 */
 	protected function assignOrgunits() {
+		global $ilDB,$rbacadmin;
 		if(!count($this->getAssignedOrgus()))
 			return false;
 		foreach ($this->getAssignedOrgus() as $orgu_obj_id) {
@@ -896,8 +897,12 @@ class ilUserSetting extends ActiveRecord {
 			$orgu_ref_id = array_shift(array_values($orgu_ref_ids));
 			if(!$orgu_ref_id)
 				continue;
-			$orgUnit = new ilObjOrgUnit($orgu_ref_id, true);
-			$orgUnit->assignUsersToEmployeeRole(array($usr_id));
+
+			$q = "SELECT obj_id, title FROM object_data WHERE title LIKE 'il_orgu_employee_" . $ilDB->quote($orgu_ref_id, "integer")."'";
+			$set = $ilDB->query($q);
+			$row=$set->fetchRow(DB_FETCHMODE_OBJECT);
+			$employee_role = $row->obj_id;
+			$rbacadmin->assignUser($employee_role, $usr_id);
 		}
 		return true;
 	}
