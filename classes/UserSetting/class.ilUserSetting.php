@@ -230,13 +230,12 @@ class ilUserSetting extends ActiveRecord {
 	 * @return bool
 	 */
 	protected function isValid() {
-		$do_assignements = true;
+		$do_assignements = false;
 		foreach ($this->getUdfCheckObjects() as $udf) {
-			if (!$udf->isValid($this->getUsrObject())) {
-				$do_assignements = false;
+			if ($udf->isValid($this->getUsrObject())) {
+				$do_assignements = true;
 			}
 		}
-
 		return $do_assignements;
 	}
 
