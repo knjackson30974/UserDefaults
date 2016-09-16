@@ -37,7 +37,7 @@ class ilUserDefaultsPlugin extends ilEventHookPlugin {
 	 *
 	 */
 	public function handleEvent($a_component, $a_event, $a_parameter) {
-		if ( $a_component == 'Services/Authentication' && $a_event == 'nafLogin' ) {
+		if ( $a_component == 'Services/Authentication' && ($a_event == 'nafLogin'||$a_event=='afterLogin') ) {
 			/**
 			 * @var $ilUser ilObjUser
 			 */
