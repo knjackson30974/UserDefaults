@@ -175,7 +175,7 @@ class ilUserSetting extends ActiveRecord {
 
 	/**
 	 * @param \ilObjUser[] $ilObjUsers
-	 */ 
+	 */
 	public function doMultipleAssignements(array $ilObjUsers) {
 		foreach ($ilObjUsers as $ilObjUser) {
 			if ($ilObjUser instanceof ilObjUser) {
@@ -758,13 +758,6 @@ class ilUserSetting extends ActiveRecord {
     {
         return $this->skin;
     }
-    /**
-     * @param string $skin
-     */
-    public function setSkin($skin)
-    {
-        $this->skin = $skin;
-    }
 
     /**
      * @param string $skin
@@ -773,6 +766,8 @@ class ilUserSetting extends ActiveRecord {
     {
         $this->skin = $skin;
     }
+
+
     /**
      * @return int
      */
