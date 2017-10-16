@@ -30,3 +30,8 @@ ilUDFCheck::updateDB();
 require_once('./Customizing/global/plugins/Services/EventHandling/EventHook/UserDefaults/classes/UserSetting/class.ilUserSetting.php');
 ilUserSetting::updateDB();
 ?>
+<#7>
+<?php
+require_once('./Customizing/global/plugins/Services/EventHandling/EventHook/UserDefaults/classes/UserSetting/class.ilUserSetting.php');
+ilUserSetting::updateDB();
+?>

@@ -164,6 +164,8 @@ class ilUserSetting extends ActiveRecord {
 			$this->assignGroups();
 			$this->assignToGlobalRole();
 			$this->assignOrgunits();
+            $this->assignSkin();
+            $this->assignUserStartingPoint();
 			if (ilUserDefaultsPlugin::getInstance()->is51()) {
 				$this->assignStudyprograms();
 			}
@@ -173,7 +175,7 @@ class ilUserSetting extends ActiveRecord {
 
 	/**
 	 * @param \ilObjUser[] $ilObjUsers
-	 */
+	 */ 
 	public function doMultipleAssignements(array $ilObjUsers) {
 		foreach ($ilObjUsers as $ilObjUser) {
 			if ($ilObjUser instanceof ilObjUser) {
@@ -240,19 +242,38 @@ class ilUserSetting extends ActiveRecord {
 		}
 	}
 
+    protected function assignSkin() {
+        if(is_null($this->getSkin()))
+            return false;
+        $sknst = explode(":", $this->getSkin());
+        $this->getUsrObject()->setPref("skin", $sknst[0]);
+        $this->getUsrObject()->setPref("style", $sknst[1]);
+        $this->getUsrObject()->update();
+        return true;
+    }
+
+    protected function assignUserStartingPoint() {
+        if(is_null($this->getUsrStartingPoint()) || is_null($this->getUsrStartingPointRefId()))
+            return false;
+        $this->getUsrObject()->setPref('usr_starting_point', $this->getUsrStartingPoint());
+        $this->getUsrObject()->setPref('usr_starting_point_ref_id', $this->getUsrStartingPointRefId());
+        $this->getUsrObject()->update();
+        return true;
+    }
+
+
 
 	/**
 	 * @return bool
 	 */
 	protected function isValid() {
-		$do_assignements = true;
-		foreach ($this->getUdfCheckObjects() as $udf) {
-			if (!$udf->isValid($this->getUsrObject())) {
-				$do_assignements = false;
-			}
-		}
-
-		return $do_assignements;
+        $do_assignements = false;
+        foreach ($this->getUdfCheckObjects() as $udf) {
+            if ($udf->isValid($this->getUsrObject())) {
+                $do_assignements = true;
+            }
+        }
+        return $do_assignements;
 	}
 
 
@@ -523,6 +544,32 @@ class ilUserSetting extends ActiveRecord {
 	 * @con_length    256
 	 */
 	protected $portfolio_name = '';
+
+    /**
+     * @var string
+     *
+     * @con_has_field true
+     * @con_fieldtype text
+     * @con_length    256
+     */
+    protected $skin = '';
+    /**
+     * @var int
+     *
+     * @con_has_field  true
+     * @con_fieldtype  integer
+     * @con_length     8
+     */
+    protected $usr_starting_point = 0;
+    /**
+     * @var int
+     *
+     * @con_has_field  true
+     * @con_fieldtype  integer
+     * @con_length     8
+     */
+    protected $usr_starting_point_ref_id = 0;
+
 	/**
 	 * @var array
 	 *
@@ -704,7 +751,59 @@ class ilUserSetting extends ActiveRecord {
 	}
 
 
-	/**
+    /**
+     * @return string
+     */
+    public function getSkin()
+    {
+        return $this->skin;
+    }
+    /**
+     * @param string $skin
+     */
+    public function setSkin($skin)
+    {
+        $this->skin = $skin;
+    }
+
+    /**
+     * @param string $skin
+     */
+    public function setSkin($skin)
+    {
+        $this->skin = $skin;
+    }
+    /**
+     * @return int
+     */
+    public function getUsrStartingPoint()
+    {
+        return $this->usr_starting_point;
+    }
+    /**
+     * @param int $usr_starting_point
+     */
+    public function setUsrStartingPoint($usr_starting_point)
+    {
+        $this->usr_starting_point = $usr_starting_point;
+    }
+    /**
+     * @return int
+     */
+    public function getUsrStartingPointRefId()
+    {
+        return $this->usr_starting_point_ref_id;
+    }
+    /**
+     * @param int $usr_starting_point_ref_id
+     */
+    public function setUsrStartingPointRefId($usr_starting_point_ref_id)
+    {
+        $this->usr_starting_point_ref_id = $usr_starting_point_ref_id;
+    }
+
+
+    /**
 	 * @param array $assigned_courses_desktop
 	 */
 	public function setAssignedCoursesDesktop($assigned_courses_desktop) {

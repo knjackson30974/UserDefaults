@@ -13,6 +13,7 @@ require_once("./Services/Form/classes/class.ilRepositorySelectorInputGUI.php");
 class ilUserSettingsFormGUI extends ilPropertyFormGUI {
 
 	const F_TITLE = 'title';
+	const F_SKIN = 'Skin';
 	const F_STATUS = 'status';
 	const F_GLOBAL_ROLE = 'global_role';
 	const F_ASSIGNED_COURSES = 'assigned_courses';
@@ -26,6 +27,9 @@ class ilUserSettingsFormGUI extends ilPropertyFormGUI {
 	const F_DESCRIPTION = 'description';
 	const F_PORTFOLIO_NAME = 'portfolio_name';
 	const F_BLOG_NAME = 'blog_name';
+    const F_USR_START = 'usr_start';
+    const F_USR_START_REF_ID = 'usr_start_ref_id';
+
 	/**
 	 * @var ilUserSettingsGUI
 	 */
@@ -42,7 +46,8 @@ class ilUserSettingsFormGUI extends ilPropertyFormGUI {
 	 */
 	public function __construct(ilUserSettingsGUI $parent_gui, ilUserSetting $ilUserSetting) {
 
-		global $ilCtrl;
+		global $ilCtrl,$lng;
+		$this->lng = $lng;
 		$this->parent_gui = $parent_gui;
 		$this->object = $ilUserSetting;
 		$this->ctrl = $ilCtrl;
@@ -116,6 +121,16 @@ class ilUserSettingsFormGUI extends ilPropertyFormGUI {
 		//		$te->setRequired(true);
 		$this->addItem($te);
 
+        $se = new ilSelectInputGUI($this->txt(self::F_SKIN), self::F_SKIN);
+        $options = [];
+        foreach (ilStyleDefinition::getAllSkinStyles() as $skin) {
+            $options[$skin["id"]] = $skin["title"];
+        }
+        asort($options);
+        $se->setOptions($options);
+        $this->addItem($se);
+
+
 		$te = new ilTextInputGUI($this->txt(self::F_BLOG_NAME), self::F_BLOG_NAME);
 		$this->addItem($te);
 
@@ -127,7 +142,40 @@ class ilUserSettingsFormGUI extends ilPropertyFormGUI {
 		$ilOrgUnitMultiSelectInputGUI->setAjaxLink($this->ctrl->getLinkTarget($this->parent_gui, ilUserSettingsGUI::CMD_SEARCH_COURSES));
 		$this->addItem($ilOrgUnitMultiSelectInputGUI);
 
-		if ($this->pl->is51()) {
+
+        include_once "Services/User/classes/class.ilUserUtil.php";
+        $this->lng->loadLanguageModule("administration");
+        $si = new ilRadioGroupInputGUI($this->lng->txt("adm_user_starting_point"), "usr_start");
+        $si->setRequired(true);
+        $si->setInfo($this->lng->txt("adm_user_starting_point_info"));
+        foreach(ilUserUtil::getPossibleStartingPoints() as $value => $caption)
+        {
+            $si->addOption(new ilRadioOption($caption, $value));
+        }
+        $this->addItem($si);
+        // starting point: repository object
+        $repobj = new ilRadioOption($this->lng->txt("adm_user_starting_point_object"), ilUserUtil::START_REPOSITORY_OBJ);
+        $repobj_id = new ilTextInputGUI($this->lng->txt("adm_user_starting_point_ref_id"), "usr_start_ref_id");
+        $repobj_id->setRequired(true);
+        $repobj_id->setSize(5);
+        if($si->getValue() == ilUserUtil::START_REPOSITORY_OBJ)
+        {
+            $start_ref_id = ilUserUtil::getPersonalStartingObject();
+            $repobj_id->setValue($start_ref_id);
+            if($start_ref_id)
+            {
+                $start_obj_id = ilObject::_lookupObjId($start_ref_id);
+                if($start_obj_id)
+                {
+                    $repobj_id->setInfo($this->lng->txt("obj_".ilObject::_lookupType($start_obj_id)).
+                        ": ".ilObject::_lookupTitle($start_obj_id));
+                }
+            }
+        }
+        $repobj->addSubItem($repobj_id);
+        $si->addOption($repobj);
+
+        if ($this->pl->is51()) {
 			$ilStudyProgramMultiSelectInputGUI = new ilContainerMultiSelectInputGUI('prg', $this->txt(self::F_ASSIGNED_STUDYPROGRAMS), self::F_ASSIGNED_STUDYPROGRAMS);
 			$ilStudyProgramMultiSelectInputGUI->setAjaxLink($this->ctrl->getLinkTarget($this->parent_gui, ilUserSettingsGUI::CMD_SEARCH_COURSES));
 			$this->addItem($ilStudyProgramMultiSelectInputGUI);
@@ -174,6 +222,9 @@ class ilUserSettingsFormGUI extends ilPropertyFormGUI {
 			self::F_PORTFOLIO_NAME               => $this->object->getPortfolioName(),
 			self::F_ASSIGNED_ORGUS               => implode(',', $this->object->getAssignedOrgus()),
 			self::F_ASSIGNED_STUDYPROGRAMS       => implode(',', $this->object->getAssignedStudyprograms()),
+            self::F_SKIN => $this->object->getSkin(),
+            self::F_USR_START => $this->object->getUsrStartingPoint(),
+            self::F_USR_START_REF_ID => $this->object->getUsrStartingPointRefId(),
 		);
 		$this->setValuesByArray($array);
 	}
@@ -208,8 +259,11 @@ class ilUserSettingsFormGUI extends ilPropertyFormGUI {
 		$this->object->setAssignedOrgus(explode(',', $assigned_orgus[0]));
 		$assigned_studyprograms = $this->getInput(self::F_ASSIGNED_STUDYPROGRAMS);
 		$this->object->setAssignedStudyprograms(explode(',', $assigned_studyprograms[0]));
+        $this->object->setSkin($this->getInput(self::F_SKIN));
+        $this->object->setUsrStartingPoint($this->getInput(self::F_USR_START));
+        $this->object->setUsrStartingPointRefId($this->getInput(self::F_USR_START_REF_ID));
 
-		if ($this->object->getId() > 0) {
+        if ($this->object->getId() > 0) {
 			$this->object->update();
 		} else {
 			$this->object->create();
