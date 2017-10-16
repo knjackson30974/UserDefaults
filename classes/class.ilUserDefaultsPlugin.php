@@ -37,11 +37,17 @@ class ilUserDefaultsPlugin extends ilEventHookPlugin {
 	 * @param    array         array of event specific parameters
 	 */
 	public function handleEvent($a_component, $a_event, $a_parameter) {
-		if ($a_component == 'Services/User' AND ($a_event == 'saveAsNew' OR $a_event == 'afterCreate' OR $a_event == 'afterLogin')) {
-			/**
+
+		if ( $a_event == 'afterLogin' OR ($a_component == 'Services/User' AND ($a_event == 'savAsNew' OR $a_event == 'afterCreate'))) {
+
+		    /**
 			 * @var $ilUser ilObjUser
 			 */
-			$ilUser = $a_parameter['user_obj'];
+            if ( is_null($a_parameter['user_obj']) && $a_parameter['username'] !== 'anonymous' ) {
+                $ilUser = new ilObjUser( ilObjUser::getUserIdByLogin( $a_parameter['username'] ) );
+            } else {
+                $ilUser = $a_parameter['user_obj'];
+            }
 
 			if ($ilUser instanceof ilObjUser) {
 				// Do Stuff
